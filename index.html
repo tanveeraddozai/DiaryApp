@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>School Homework Diary</title>
+	<link rel="manifest" href="manifest.json">
+	<meta name="theme-color" content="#2c3e50">
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --bg-color: #f4f7f6;
+            --card-bg: #ffffff;
+            --text-color: #333;
+            --border-color: #e0e0e0;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+            margin: 0;
+        }
+
+        .app-container {
+            background-color: var(--card-bg);
+            max-width: 600px;
+            width: 100%;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        }
+
+        /* Editable Heading */
+        .school-heading {
+            text-align: center;
+            color: var(--primary-color);
+            font-size: 28px;
+            font-weight: 800;
+            margin: 0 0 10px 0;
+            padding: 10px;
+            border-bottom: 2px solid var(--accent-color);
+            outline: none;
+            transition: background-color 0.3s;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .school-heading:hover, .school-heading:focus {
+            background-color: #f8f9fa;
+        }
+
+        /* Date and Day */
+        .date-container {
+            text-align: center;
+            color: #7f8c8d;
+            font-size: 16px;
+            margin-bottom: 30px;
+            font-weight: 500;
+        }
+
+        /* Subjects Grid */
+        .subject-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            background: #fdfdfd;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 8px 15px;
+            transition: box-shadow 0.2s;
+        }
+
+        .subject-row:focus-within {
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+            border-color: var(--accent-color);
+        }
+
+        .subject-label {
+            flex: 0 0 140px;
+            font-weight: 600;
+            color: var(--primary-color);
+            font-size: 14px;
+        }
+
+        .subject-input {
+            flex: 1;
+            border: none;
+            background: transparent;
+            padding: 10px;
+            font-size: 15px;
+            outline: none;
+            color: var(--text-color);
+        }
+
+        .subject-input::placeholder {
+            color: #bdc3c7;
+        }
+
+        /* Note Section */
+        .note-container {
+            margin-top: 25px;
+        }
+
+        .note-label {
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .note-input {
+            width: 100%;
+            box-sizing: border-box;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 15px;
+            font-family: inherit;
+            font-size: 15px;
+            resize: vertical;
+            min-height: 100px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .note-input:focus {
+            border-color: var(--accent-color);
+        }
+
+        /* Print formatting */
+        @media print {
+            body { background-color: white; }
+            .app-container { box-shadow: none; padding: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <div id="school-name" class="school-heading" contenteditable="true" title="Click to edit school name">Rizwan Public School</div>
+        
+        <div class="date-container">
+            <span id="current-day"></span>, <span id="current-date"></span>
+        </div>
+
+        <div id="subjects-container">
+            </div>
+
+        <div class="note-container">
+            <label class="note-label" for="daily-note">Note:</label>
+            <textarea id="daily-note" class="note-input" placeholder="Type any important notes or reminders here..."></textarea>
+        </div>
+    </div>
+
+    <script>
+        // Set Current Date and Day
+        const dateDisplay = document.getElementById('current-date');
+        const dayDisplay = document.getElementById('current-day');
+        
+        const today = new Date();
+        const dateOptions = { year: 'numeric', month: 'long', day: 'numeric' };
+        
+        dayDisplay.textContent = today.toLocaleDateString('en-US', { weekday: 'long' });
+        dateDisplay.textContent = today.toLocaleDateString('en-US', dateOptions);
+
+        // Subject List
+        const subjects = [
+            "English - A",
+            "English - B",
+            "Urdu - A",
+            "Urdu - B",
+            "Math",
+            "GK/SSt/Geo/Hist",
+            "Computer",
+            "Islamiyat"
+        ];
+
+        // Generate Subject Rows dynamically
+        const container = document.getElementById('subjects-container');
+        
+        subjects.forEach(subject => {
+            const row = document.createElement('div');
+            row.className = 'subject-row';
+            
+            const label = document.createElement('div');
+            label.className = 'subject-label';
+            label.textContent = subject;
+            
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.className = 'subject-input';
+            input.placeholder = `Enter homework for ${subject}...`;
+            
+            // Basic local storage save (Optional: keeps data if tab is accidentally closed)
+            const storageKey = `hw_${subject}`;
+            input.value = localStorage.getItem(storageKey) || '';
+            input.addEventListener('input', (e) => {
+                localStorage.setItem(storageKey, e.target.value);
+            });
+
+            row.appendChild(label);
+            row.appendChild(input);
+            container.appendChild(row);
+        });
+
+        // Save Note to local storage
+        const noteInput = document.getElementById('daily-note');
+        noteInput.value = localStorage.getItem('hw_note') || '';
+        noteInput.addEventListener('input', (e) => {
+            localStorage.setItem('hw_note', e.target.value);
+        });
+
+        // Save Custom School Name to local storage
+        const schoolHeading = document.getElementById('school-name');
+        const savedName = localStorage.getItem('school_name');
+        if (savedName) schoolHeading.textContent = savedName;
+        
+        schoolHeading.addEventListener('input', (e) => {
+            localStorage.setItem('school_name', e.target.textContent);
+        });
+// Service Worker Registration
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then(registration => {
+        console.log('ServiceWorker registered successfully!');
+      })
+      .catch(error => {
+        console.log('ServiceWorker registration failed: ', error);
+      });
+  });
+}
+    </script>
+</body>
+</html>
