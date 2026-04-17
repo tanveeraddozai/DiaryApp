@@ -94,9 +94,9 @@
             border: 1px solid rgba(255, 255, 255, 0.5);
         }
 
-        /* Author Credits - NEW */
+        /* Author Credits - Reduced Size */
         .author-credits {
-            font-size: 07px;
+            font-size: 8px; /* Reduced by 2 points from 10px */
             font-family: 'Arial', sans-serif;
             color: rgba(255, 255, 255, 0.85);
             letter-spacing: 0.5px;
@@ -139,11 +139,11 @@
 
         /* FIXED WIDTH TABS */
         .subject-label {
-            flex: 0 0 145px; /* Forced exact width for all tabs */
+            flex: 0 0 145px;
             box-sizing: border-box;
             font-weight: 700;
             color: white;
-            font-size: 12px; /* Slightly smaller to fit long names perfectly */
+            font-size: 12px;
             padding: 10px 8px;
             text-align: center;
             display: flex;
@@ -160,7 +160,7 @@
             font-size: 15px;
             outline: none;
             color: var(--text-color);
-            min-width: 0; /* Prevents input from stretching the box */
+            min-width: 0;
         }
 
         /* Note Section */
@@ -183,7 +183,7 @@
             border-color: #9013fe;
         }
 
-        /* Attachment Section - NEW */
+        /* Attachment Section */
         .attachment-section {
             margin-bottom: 20px;
         }
@@ -385,7 +385,6 @@
             const file = event.target.files[0];
             if (file) {
                 selectedFileName = file.name;
-                // Highlight the notice in red so the user knows they have an extra step
                 fileDisplay.innerHTML = `<strong>File ready:</strong> ${selectedFileName} <br><span style="color:#d93025; font-weight:bold;">⚠️ Remember: You must manually attach this file again inside WhatsApp after clicking Share.</span>`;
             }
         });
