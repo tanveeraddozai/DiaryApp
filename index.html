@@ -6,6 +6,7 @@
     <title>School Homework Diary</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#4a90e2">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         :root {
             --bg-color: #f0f4f8;
@@ -23,7 +24,7 @@
             margin: 0;
         }
 
-        .app-container {
+        #diary-card {
             background-color: var(--card-bg);
             max-width: 600px;
             width: 100%;
@@ -32,7 +33,6 @@
             overflow: hidden;
         }
 
-        /* Colorful Header */
         .header-section {
             background: linear-gradient(135deg, #4a90e2, #9013fe);
             padding: 25px 20px 15px 20px;
@@ -44,390 +44,272 @@
             gap: 12px;
         }
 
-        /* Editable Logo */
         .logo-wrapper {
-            position: relative;
-            width: 80px;
-            height: 80px;
-            cursor: pointer;
-            border-radius: 50%;
-            background-color: rgba(255, 255, 255, 0.2);
+            position: relative; width: 80px; height: 80px; cursor: pointer;
+            border-radius: 50%; background-color: rgba(255, 255, 255, 0.2);
             border: 2px dashed rgba(255, 255, 255, 0.6);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-            transition: transform 0.2s;
+            display: flex; justify-content: center; align-items: center;
+            overflow: hidden; transition: transform 0.2s;
         }
 
-        .logo-wrapper:hover {
-            transform: scale(1.05);
-        }
+        #school-logo { width: 100%; height: 100%; object-fit: cover; display: none; }
+        .logo-text { font-size: 12px; color: white; text-align: center; padding: 5px; }
 
-        #school-logo {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: none;
-        }
-
-        .logo-text {
-            font-size: 12px;
-            color: white;
-            text-align: center;
-            padding: 5px;
-        }
-
-        /* Editable Heading */
         .school-heading {
-            font-size: 26px;
-            font-weight: 800;
-            outline: none;
-            padding: 2px 15px;
-            border-radius: 8px;
-            border: 1px solid transparent;
-            transition: background 0.3s, border 0.3s;
+            font-size: 26px; font-weight: 800; outline: none; padding: 2px 15px;
+            border-radius: 8px; border: 1px solid transparent;
         }
 
-        .school-heading:focus {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.5);
-        }
-
-        /* Author Credits - Reduced Size */
         .author-credits {
-            font-size: 8px; /* Reduced by 2 points from 10px */
-            font-family: 'Arial', sans-serif;
-            color: rgba(255, 255, 255, 0.85);
-            letter-spacing: 0.5px;
-            font-weight: 400;
-            margin-top: -5px;
+            font-size: 8px; font-family: 'Arial', sans-serif;
+            color: rgba(255, 255, 255, 0.85); letter-spacing: 0.5px;
+            font-weight: 400; margin-top: -5px;
         }
 
-        /* Date and Day */
-        .date-container {
-            text-align: center;
-            background-color: #e8f0fe;
-            color: #1a73e8;
-            padding: 10px;
-            font-weight: 600;
-            font-size: 15px;
-            border-bottom: 1px solid #d2e3fc;
+        .info-bar {
+            text-align: center; background-color: #e8f0fe; padding: 12px 10px;
+            border-bottom: 1px solid #d2e3fc; display: flex; flex-direction: column;
+            gap: 8px; align-items: center;
         }
 
-        /* Subjects Grid */
-        .body-section {
-            padding: 20px;
+        .date-text { color: #1a73e8; font-weight: 600; font-size: 15px; }
+
+        .class-dropdown {
+            appearance: none; background-color: #ffffff; border: 2px solid #a8c7fa;
+            border-radius: 20px; padding: 6px 35px 6px 15px; font-size: 14px;
+            font-weight: 700; color: #1a73e8; cursor: pointer; outline: none;
+            background-image: url('data:image/svg+xml;utf8,<svg fill="%231a73e8" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
+            background-repeat: no-repeat; background-position: right 8px center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
+
+        .body-section { padding: 20px; display: none; }
 
         .subject-row {
-            display: flex;
-            align-items: stretch;
-            margin-bottom: 15px;
-            background: #fff;
-            border: 1px solid #e0e0e0;
-            border-radius: 12px;
+            display: flex; align-items: stretch; margin-bottom: 15px;
+            background: #fff; border: 1px solid #e0e0e0; border-radius: 12px;
             overflow: hidden;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
-            transition: transform 0.2s, box-shadow 0.2s;
         }
 
-        .subject-row:focus-within {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-        }
-
-        /* FIXED WIDTH TABS */
         .subject-label {
-            flex: 0 0 145px;
-            box-sizing: border-box;
-            font-weight: 700;
-            color: white;
-            font-size: 12px;
-            padding: 10px 8px;
-            text-align: center;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            flex: 0 0 145px; box-sizing: border-box; font-weight: 700;
+            color: white; font-size: 12px; padding: 10px 8px; text-align: center;
+            display: flex; align-items: center; justify-content: center;
             line-height: 1.2;
         }
 
-        .subject-input {
-            flex: 1;
-            border: none;
-            background: transparent;
-            padding: 12px 15px;
-            font-size: 15px;
-            outline: none;
-            color: var(--text-color);
-            min-width: 0;
+        .subject-input, .subject-display {
+            flex: 1; border: none; background: transparent; padding: 12px 15px;
+            font-size: 15px; outline: none; color: var(--text-color); min-width: 0;
+            resize: none; overflow: hidden; font-family: inherit;
+            min-height: 44px; box-sizing: border-box; white-space: pre-wrap;
         }
 
-        /* Note Section */
+        .subject-display { display: none; } /* Hidden during editing */
+
         .note-input {
-            width: 100%;
-            box-sizing: border-box;
-            border: 2px solid #e0e0e0;
-            border-radius: 12px;
-            padding: 15px;
-            font-family: inherit;
-            font-size: 15px;
-            resize: vertical;
-            min-height: 100px;
-            outline: none;
-            transition: border-color 0.2s;
-            margin-bottom: 15px;
+            width: 100%; box-sizing: border-box; border: 2px solid #e0e0e0;
+            border-radius: 12px; padding: 15px; font-family: inherit;
+            font-size: 15px; resize: vertical; min-height: 100px;
+            outline: none; margin-bottom: 15px;
         }
 
-        .note-input:focus {
-            border-color: #9013fe;
-        }
+        .hide-for-capture { display: flex; }
 
-        /* Attachment Section */
-        .attachment-section {
-            margin-bottom: 20px;
-        }
+        /* Capturing State overrides */
+        .capturing .hide-for-capture { display: none !important; }
+        .capturing .subject-input { display: none !important; }
+        .capturing .subject-display { display: block !important; }
+        .capturing .note-input { border-color: transparent; background: #f9f9f9; }
+        .capturing .logo-wrapper { border: none; background: transparent; }
+        .capturing .class-dropdown { background-image: none; border: none; padding: 0; font-size: 16px; }
 
-        .attachment-btn {
-            background-color: #f8f9fa;
-            color: #4a90e2;
-            border: 2px dashed #4a90e2;
-            padding: 12px;
-            border-radius: 12px;
-            width: 100%;
-            cursor: pointer;
-            font-weight: 600;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 8px;
-            box-sizing: border-box;
-            transition: background-color 0.2s;
+        .action-buttons { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
+        .btn-primary {
+            width: 100%; background-color: #9013fe; color: white; border: none; padding: 15px;
+            border-radius: 12px; font-size: 16px; font-weight: 700; cursor: pointer;
+            display: flex; justify-content: center; align-items: center; gap: 10px;
         }
-
-        .attachment-btn:hover {
-            background-color: #e8f0fe;
+        
+        .loading-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,0.9);
+            display: none; justify-content: center; align-items: center; z-index: 1000;
+            font-weight: bold; font-size: 18px; color: #9013fe;
         }
-
-        .attachment-info {
-            font-size: 11px;
-            color: #666;
-            margin-top: 6px;
-            text-align: center;
-            line-height: 1.4;
-        }
-
-        /* WhatsApp Button */
-        .wa-btn {
-            width: 100%;
-            background-color: #25D366;
-            color: white;
-            border: none;
-            padding: 15px;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 700;
-            cursor: pointer;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-            transition: background-color 0.2s;
-        }
-
-        .wa-btn:hover {
-            background-color: #128C7E;
-        }
-
-        .wa-btn svg {
-            width: 24px;
-            height: 24px;
-            fill: white;
-        }
-
     </style>
 </head>
 <body>
 
-    <div class="app-container">
+    <div id="loading" class="loading-overlay">Finalizing Image...</div>
+
+    <div class="app-container" id="diary-card">
         
         <div class="header-section">
-            <label for="logo-upload" class="logo-wrapper" title="Click to upload logo">
+            <label for="logo-upload" class="logo-wrapper">
                 <img id="school-logo" alt="School Logo">
                 <span class="logo-text" id="logo-placeholder-text">Tap to add Logo</span>
             </label>
             <input type="file" id="logo-upload" accept="image/*" style="display: none;">
-            
-            <div id="school-name" class="school-heading" contenteditable="true" title="Click to edit school name">Rizwan Public School</div>
+            <div id="school-name" class="school-heading" contenteditable="true">Rizwan Public School</div>
             <div class="author-credits">Prepared by Tanveer Ahmad Khan. +923339951177</div>
         </div>
 
-        <div class="date-container">
-            <span id="current-day"></span>, <span id="current-date"></span>
+        <div class="info-bar">
+            <div class="date-text"><span id="current-day"></span>, <span id="current-date"></span></div>
+            <select id="class-select" class="class-dropdown">
+                <option value="" disabled selected>-- Select a Class --</option>
+                <option value="Playgroup">Class: Playgroup</option>
+                <option value="Nursery">Class: Nursery</option>
+                <option value="KG">Class: KG</option>
+                <option value="Class 1">Class 1</option>
+                <option value="Class 2">Class 2</option>
+                <option value="Class 3">Class 3</option>
+                <option value="Class 4">Class 4</option>
+                <option value="Class 5">Class 5</option>
+                <option value="Class 6">Class 6</option>
+                <option value="Class 7">Class 7</option>
+            </select>
         </div>
 
-        <div class="body-section">
+        <div class="body-section" id="main-body">
             <div id="subjects-container"></div>
-
             <h4 style="margin: 20px 0 10px 0; color: #4a90e2;">📝 Important Note:</h4>
-            <textarea id="daily-note" class="note-input" placeholder="Type any important notes or reminders here..."></textarea>
-
-            <div class="attachment-section">
-                <label for="media-upload" class="attachment-btn">
-                    📎 Select Media (Photo/Video/Audio)
-                </label>
-                <input type="file" id="media-upload" accept="image/*,video/*,audio/*" style="display: none;">
-                <div id="file-name-display" class="attachment-info">
-                    Select a file you plan to send. (WhatsApp web-links cannot auto-attach files).
-                </div>
+            <textarea id="daily-note" class="note-input" placeholder="Type any important notes here..."></textarea>
+            <div class="action-buttons hide-for-capture">
+                <button class="btn-primary" onclick="shareAsImage()">🖼️ Share Beautiful Design via WhatsApp</button>
             </div>
-
-            <button class="wa-btn" onclick="shareToWhatsApp()">
-                <svg viewBox="0 0 24 24">
-                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/>
-                </svg>
-                Share Diary via WhatsApp
-            </button>
         </div>
     </div>
 
     <script>
-        // 1. Date Logic
         const dateDisplay = document.getElementById('current-date');
         const dayDisplay = document.getElementById('current-day');
         const today = new Date();
         dayDisplay.textContent = today.toLocaleDateString('en-US', { weekday: 'long' });
         dateDisplay.textContent = today.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
-        // 2. Subjects
-        const subjects = [
-            { name: "English - A", color: "#FF6B6B" },
-            { name: "English - B", color: "#FF8E53" },
-            { name: "Urdu - A", color: "#4ECDC4" },
-            { name: "Urdu - B", color: "#45B7D1" },
-            { name: "Math", color: "#96CEB4" },
-            { name: "GK/SSt/Geo/History", color: "#FFEEAD" },
-            { name: "Computer", color: "#D4A5A5" },
-            { name: "Islamiyat", color: "#9B59B6" }
-        ];
+        const juniorSubjects = ["English", "Urdu", "Math", "GK", "Islamiyat"];
+        const seniorSubjects = ["English - A", "English - B", "Urdu - A", "Urdu - B", "Math", "GK/SSt/Geo/History", "Computer", "Islamiyat"];
+        const colors = ["#FF6B6B", "#FF8E53", "#4ECDC4", "#45B7D1", "#96CEB4", "#FFEEAD", "#D4A5A5", "#9B59B6"];
 
-        // 3. Render Subjects
+        const classSelect = document.getElementById('class-select');
+        const mainBody = document.getElementById('main-body');
         const container = document.getElementById('subjects-container');
-        subjects.forEach(sub => {
-            const row = document.createElement('div');
-            row.className = 'subject-row';
-            
-            const label = document.createElement('div');
-            label.className = 'subject-label';
-            label.textContent = sub.name;
-            label.style.backgroundColor = sub.color;
-            if(sub.name === "GK/SSt/Geo/History") label.style.color = "#333";
 
-            const input = document.createElement('input');
-            input.type = 'text';
-            input.className = 'subject-input hw-input';
-            input.dataset.subject = sub.name;
-            input.placeholder = `Add homework...`;
-            
-            const storageKey = `hw_${sub.name}`;
-            input.value = localStorage.getItem(storageKey) || '';
-            input.addEventListener('input', (e) => localStorage.setItem(storageKey, e.target.value));
+        function autoResize(el) {
+            el.style.height = 'auto';
+            el.style.height = el.scrollHeight + 'px';
+        }
 
-            row.appendChild(label);
-            row.appendChild(input);
-            container.appendChild(row);
+        function renderSubjects(selectedClass) {
+            container.innerHTML = '';
+            if (!selectedClass) { mainBody.style.display = 'none'; return; }
+            mainBody.style.display = 'block';
+
+            const list = ["Playgroup", "Nursery", "KG"].includes(selectedClass) ? juniorSubjects : seniorSubjects;
+
+            list.forEach((name, i) => {
+                const row = document.createElement('div');
+                row.className = 'subject-row';
+                
+                const label = document.createElement('div');
+                label.className = 'subject-label';
+                label.textContent = name;
+                label.style.backgroundColor = colors[i % colors.length];
+                if(name.includes("GK")) label.style.color = "#333";
+
+                const input = document.createElement('textarea');
+                input.className = 'subject-input hw-input';
+                input.dataset.subject = name;
+                input.placeholder = `Add homework...`;
+                input.rows = 1;
+
+                // Hidden div that will mirror the textarea for the screenshot
+                const display = document.createElement('div');
+                display.className = 'subject-display';
+
+                const storageKey = `hw_${selectedClass}_${name}`;
+                input.value = localStorage.getItem(storageKey) || '';
+                display.textContent = input.value;
+                
+                input.addEventListener('input', function() {
+                    localStorage.setItem(storageKey, this.value);
+                    display.textContent = this.value;
+                    autoResize(this);
+                });
+
+                row.appendChild(label);
+                row.appendChild(input);
+                row.appendChild(display);
+                container.appendChild(row);
+                setTimeout(() => autoResize(input), 0);
+            });
+        }
+
+        classSelect.addEventListener('change', (e) => {
+            localStorage.setItem('selected_class', e.target.value);
+            renderSubjects(e.target.value);
         });
 
-        // 4. Save/Load Note
-        const noteInput = document.getElementById('daily-note');
-        noteInput.value = localStorage.getItem('hw_note') || '';
-        noteInput.addEventListener('input', (e) => localStorage.setItem('hw_note', e.target.value));
+        const savedClass = localStorage.getItem('selected_class');
+        if (savedClass) { classSelect.value = savedClass; renderSubjects(savedClass); }
 
-        // 5. Save/Load School Name
-        const schoolHeading = document.getElementById('school-name');
-        const savedName = localStorage.getItem('school_name');
-        if (savedName) schoolHeading.textContent = savedName;
-        schoolHeading.addEventListener('input', (e) => localStorage.setItem('school_name', e.target.textContent));
-
-        // 6. Logo Logic
+        // School Logo Logic
         const logoUpload = document.getElementById('logo-upload');
         const schoolLogo = document.getElementById('school-logo');
-        const logoPlaceholderText = document.getElementById('logo-placeholder-text');
-
+        const logoPlaceholder = document.getElementById('logo-placeholder-text');
         const savedLogo = localStorage.getItem('school_logo');
-        if (savedLogo) {
-            schoolLogo.src = savedLogo;
-            schoolLogo.style.display = 'block';
-            logoPlaceholderText.style.display = 'none';
-        }
+        if (savedLogo) { schoolLogo.src = savedLogo; schoolLogo.style.display = 'block'; logoPlaceholder.style.display = 'none'; }
 
-        logoUpload.addEventListener('change', function(event) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const base64Image = e.target.result;
-                    schoolLogo.src = base64Image;
-                    schoolLogo.style.display = 'block';
-                    logoPlaceholderText.style.display = 'none';
-                    localStorage.setItem('school_logo', base64Image);
-                };
-                reader.readAsDataURL(file);
-            }
+        logoUpload.addEventListener('change', e => {
+            const reader = new FileReader();
+            reader.onload = img => {
+                schoolLogo.src = img.target.result;
+                schoolLogo.style.display = 'block';
+                logoPlaceholder.style.display = 'none';
+                localStorage.setItem('school_logo', img.target.result);
+            };
+            reader.readAsDataURL(e.target.files[0]);
         });
 
-        // 7. Media Attachment Notice Logic
-        const mediaUpload = document.getElementById('media-upload');
-        const fileDisplay = document.getElementById('file-name-display');
-        let selectedFileName = "";
+        // FIXED Screenshot Logic
+        async function shareAsImage() {
+            const diaryCard = document.getElementById('diary-card');
+            const loading = document.getElementById('loading');
+            loading.style.display = 'flex';
 
-        mediaUpload.addEventListener('change', function(event) {
-            const file = event.target.files[0];
-            if (file) {
-                selectedFileName = file.name;
-                fileDisplay.innerHTML = `<strong>File ready:</strong> ${selectedFileName} <br><span style="color:#d93025; font-weight:bold;">⚠️ Remember: You must manually attach this file again inside WhatsApp after clicking Share.</span>`;
-            }
-        });
-
-        // 8. WhatsApp Share Logic
-        function shareToWhatsApp() {
-            const schoolName = document.getElementById('school-name').textContent;
-            const dateStr = `${dayDisplay.textContent}, ${dateDisplay.textContent}`;
-            const noteText = document.getElementById('daily-note').value;
-            
-            let message = `🏫 *${schoolName}*\n`;
-            message += `📅 *Date:* ${dateStr}\n\n`;
-            message += `📚 *HOMEWORK DIARY:*\n`;
-            message += `------------------------\n`;
-
-            const inputs = document.querySelectorAll('.hw-input');
-            inputs.forEach(input => {
-                const subject = input.dataset.subject;
-                const homework = input.value.trim();
-                if (homework) {
-                    message += `*${subject}:* ${homework}\n`;
-                }
+            // Sync all display divs with their textareas
+            document.querySelectorAll('.subject-row').forEach(row => {
+                const input = row.querySelector('.subject-input');
+                const display = row.querySelector('.subject-display');
+                display.textContent = input.value;
+                // Hide row if empty
+                if(!input.value.trim()) row.style.display = 'none';
             });
 
-            message += `------------------------\n`;
-            
-            if (noteText.trim()) {
-                message += `📝 *Note:* ${noteText}\n\n`;
+            diaryCard.classList.add('capturing');
+
+            try {
+                const canvas = await html2canvas(diaryCard, {
+                    scale: 2, useCORS: true, backgroundColor: '#ffffff',
+                    windowWidth: diaryCard.scrollWidth,
+                    windowHeight: diaryCard.scrollHeight
+                });
+
+                canvas.toBlob(async blob => {
+                    const file = new File([blob], "Diary.png", { type: "image/png" });
+                    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                        await navigator.share({ files: [file], title: 'Homework' });
+                    } else {
+                        const link = document.createElement('a');
+                        link.download = 'Diary.png'; link.href = URL.createObjectURL(blob); link.click();
+                    }
+                });
+            } finally {
+                diaryCard.classList.remove('capturing');
+                document.querySelectorAll('.subject-row').forEach(row => row.style.display = 'flex');
+                loading.style.display = 'none';
             }
-
-            if (selectedFileName) {
-                message += `📎 *(A media file is meant to be attached with this message)*\n`;
-            }
-
-            const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
-            window.open(whatsappUrl, '_blank');
-        }
-
-        // Service Worker
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js').catch(err => console.log(err));
-            });
         }
     </script>
 </body>
