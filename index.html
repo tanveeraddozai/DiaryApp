@@ -86,7 +86,7 @@
     // --- 1. Supabase Config ---
     const SB_URL = "https://mvdvfzmzafporanneowu.supabase.co";
     const SB_KEY = "sb_publishable_0a6fBLvOqifI_Th3eFRBiA_g4Cmx0BQ"; // Note: Use Service Role key for backend, but this anon key works for public policies
-    const supabase = supabase.createClient(SB_URL, SB_KEY);
+    const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
 
     // --- 2. Setup ---
     const dateDisplay = document.getElementById('current-date');
@@ -204,7 +204,7 @@
 
         try {
             // A. Save to Supabase
-            await supabase.from('diaries').insert([{
+            await supabaseClient.from('diaries').insert([{
                 school_name: schoolHeading.textContent,
                 class_name: classSelect.value,
                 diary_date: new Date().toISOString().split('T')[0],
