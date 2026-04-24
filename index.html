@@ -3,314 +3,241 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>School Homework Diary</title>
+    <title>Rizwan Public School Diary</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#4a90e2">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        :root {
-            --bg-color: #f0f4f8;
-            --card-bg: #ffffff;
-            --text-color: #333;
-        }
-
-        body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            display: flex;
-            justify-content: center;
-            padding: 15px;
-            margin: 0;
-        }
-
-        #diary-card {
-            background-color: var(--card-bg);
-            max-width: 600px;
-            width: 100%;
-            border-radius: 20px;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-        }
-
-        .header-section {
-            background: linear-gradient(135deg, #4a90e2, #9013fe);
-            padding: 25px 20px 15px 20px;
-            text-align: center;
-            color: white;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .logo-wrapper {
-            position: relative; width: 80px; height: 80px; cursor: pointer;
-            border-radius: 50%; background-color: rgba(255, 255, 255, 0.2);
-            border: 2px dashed rgba(255, 255, 255, 0.6);
-            display: flex; justify-content: center; align-items: center;
-            overflow: hidden; transition: transform 0.2s;
-        }
-
+        :root { --bg-color: #f0f4f8; --card-bg: #ffffff; --text-color: #333; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background-color: var(--bg-color); color: var(--text-color); display: flex; justify-content: center; padding: 15px; margin: 0; }
+        #diary-card { background-color: var(--card-bg); max-width: 600px; width: 100%; border-radius: 20px; box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1); overflow: hidden; }
+        .header-section { background: linear-gradient(135deg, #4a90e2, #9013fe); padding: 25px 20px 15px 20px; text-align: center; color: white; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+        .logo-wrapper { position: relative; width: 80px; height: 80px; cursor: pointer; border-radius: 50%; background-color: rgba(255, 255, 255, 0.2); border: 2px dashed rgba(255, 255, 255, 0.6); display: flex; justify-content: center; align-items: center; overflow: hidden; }
         #school-logo { width: 100%; height: 100%; object-fit: cover; display: none; }
-        .logo-text { font-size: 12px; color: white; text-align: center; padding: 5px; }
-
-        .school-heading {
-            font-size: 26px; font-weight: 800; outline: none; padding: 2px 15px;
-            border-radius: 8px; border: 1px solid transparent;
-        }
-
-        .author-credits {
-            font-size: 8px; font-family: 'Arial', sans-serif;
-            color: rgba(255, 255, 255, 0.85); letter-spacing: 0.5px;
-            font-weight: 400; margin-top: -5px;
-        }
-
-        .info-bar {
-            text-align: center; background-color: #e8f0fe; padding: 12px 10px;
-            border-bottom: 1px solid #d2e3fc; display: flex; flex-direction: column;
-            gap: 8px; align-items: center;
-        }
-
-        .date-text { color: #1a73e8; font-weight: 600; font-size: 15px; }
-
-        .class-dropdown {
-            appearance: none; background-color: #ffffff; border: 2px solid #a8c7fa;
-            border-radius: 20px; padding: 6px 35px 6px 15px; font-size: 14px;
-            font-weight: 700; color: #1a73e8; cursor: pointer; outline: none;
-            background-image: url('data:image/svg+xml;utf8,<svg fill="%231a73e8" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
-            background-repeat: no-repeat; background-position: right 8px center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-        }
-
+        .logo-text { font-size: 10px; color: white; text-align: center; }
+        .school-heading { font-size: 24px; font-weight: 800; outline: none; }
+        .author-credits { font-size: 8px; color: rgba(255, 255, 255, 0.8); }
+        .info-bar { text-align: center; background-color: #e8f0fe; padding: 12px; border-bottom: 1px solid #d2e3fc; display: flex; flex-direction: column; gap: 8px; align-items: center; }
+        .date-text { color: #1a73e8; font-weight: 600; }
+        .class-dropdown { appearance: none; background-color: #fff; border: 2px solid #a8c7fa; border-radius: 20px; padding: 6px 35px 6px 15px; font-weight: 700; color: #1a73e8; cursor: pointer; outline: none; background-image: url('data:image/svg+xml;utf8,<svg fill="%231a73e8" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>'); background-repeat: no-repeat; background-position: right 8px center; }
         .body-section { padding: 20px; display: none; }
-
-        .subject-row {
-            display: flex; align-items: stretch; margin-bottom: 15px;
-            background: #fff; border: 1px solid #e0e0e0; border-radius: 12px;
-            overflow: hidden;
-        }
-
-        .subject-label {
-            flex: 0 0 145px; box-sizing: border-box; font-weight: 700;
-            color: white; font-size: 12px; padding: 10px 8px; text-align: center;
-            display: flex; align-items: center; justify-content: center;
-            line-height: 1.2;
-        }
-
-        .subject-input, .subject-display {
-            flex: 1; border: none; background: transparent; padding: 12px 15px;
-            font-size: 15px; outline: none; color: var(--text-color); min-width: 0;
-            resize: none; overflow: hidden; font-family: inherit;
-            min-height: 44px; box-sizing: border-box; white-space: pre-wrap;
-        }
-
-        .subject-display { display: none; } /* Hidden during editing */
-
-        .note-input {
-            width: 100%; box-sizing: border-box; border: 2px solid #e0e0e0;
-            border-radius: 12px; padding: 15px; font-family: inherit;
-            font-size: 15px; resize: vertical; min-height: 100px;
-            outline: none; margin-bottom: 15px;
-        }
-
-        .hide-for-capture { display: flex; }
-
-        /* Capturing State overrides */
+        .subject-row { display: flex; align-items: stretch; margin-bottom: 12px; border: 1px solid #e0e0e0; border-radius: 12px; overflow: hidden; }
+        .subject-label { flex: 0 0 130px; font-weight: 700; color: white; font-size: 12px; padding: 10px; text-align: center; display: flex; align-items: center; justify-content: center; }
+        .subject-input, .subject-display { flex: 1; border: none; padding: 12px; font-size: 15px; outline: none; font-family: inherit; resize: none; overflow: hidden; min-height: 44px; white-space: pre-wrap; }
+        .subject-display { display: none; }
+        .note-input { width: 100%; border: 2px solid #e0e0e0; border-radius: 12px; padding: 15px; font-family: inherit; font-size: 15px; min-height: 80px; margin-bottom: 15px; outline: none; }
+        .action-buttons { display: flex; flex-direction: column; gap: 10px; }
+        .btn-primary { width: 100%; background: #9013fe; color: white; border: none; padding: 15px; border-radius: 12px; font-size: 16px; font-weight: 700; cursor: pointer; }
+        .btn-reset { background: #ff4757; color: white; border: none; padding: 10px; border-radius: 8px; font-size: 12px; cursor: pointer; margin-top: 10px; }
+        .loading-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,0.9); display: none; justify-content: center; align-items: center; z-index: 1000; font-weight: bold; color: #9013fe; }
+        /* Capture Mode */
         .capturing .hide-for-capture { display: none !important; }
         .capturing .subject-input { display: none !important; }
         .capturing .subject-display { display: block !important; }
-        .capturing .note-input { border-color: transparent; background: #f9f9f9; }
-        .capturing .logo-wrapper { border: none; background: transparent; }
         .capturing .class-dropdown { background-image: none; border: none; padding: 0; font-size: 16px; }
-
-        .action-buttons { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
-        .btn-primary {
-            width: 100%; background-color: #9013fe; color: white; border: none; padding: 15px;
-            border-radius: 12px; font-size: 16px; font-weight: 700; cursor: pointer;
-            display: flex; justify-content: center; align-items: center; gap: 10px;
-        }
-        
-        .loading-overlay {
-            position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,0.9);
-            display: none; justify-content: center; align-items: center; z-index: 1000;
-            font-weight: bold; font-size: 18px; color: #9013fe;
-        }
     </style>
 </head>
 <body>
 
-    <div id="loading" class="loading-overlay">Finalizing Image...</div>
+<div id="loading" class="loading-overlay">Syncing to Cloud & Generating...</div>
 
-    <div class="app-container" id="diary-card">
-        
-        <div class="header-section">
-            <label for="logo-upload" class="logo-wrapper">
-                <img id="school-logo" alt="School Logo">
-                <span class="logo-text" id="logo-placeholder-text">Tap to add Logo</span>
-            </label>
-            <input type="file" id="logo-upload" accept="image/*" style="display: none;">
-            <div id="school-name" class="school-heading" contenteditable="true">Rizwan Public School</div>
-            <div class="author-credits">Prepared by Tanveer Ahmad Khan. +923339951177</div>
-        </div>
-
-        <div class="info-bar">
-            <div class="date-text"><span id="current-day"></span>, <span id="current-date"></span></div>
-            <select id="class-select" class="class-dropdown">
-                <option value="" disabled selected>-- Select a Class --</option>
-                <option value="Playgroup">Class: Playgroup</option>
-                <option value="Nursery">Class: Nursery</option>
-                <option value="KG">Class: KG</option>
-                <option value="Class 1">Class 1</option>
-                <option value="Class 2">Class 2</option>
-                <option value="Class 3">Class 3</option>
-                <option value="Class 4">Class 4</option>
-                <option value="Class 5">Class 5</option>
-                <option value="Class 6">Class 6</option>
-                <option value="Class 7">Class 7</option>
-            </select>
-        </div>
-
-        <div class="body-section" id="main-body">
-            <div id="subjects-container"></div>
-            <h4 style="margin: 20px 0 10px 0; color: #4a90e2;">📝 Important Note:</h4>
-            <textarea id="daily-note" class="note-input" placeholder="Type any important notes here..."></textarea>
-            <div class="action-buttons hide-for-capture">
-                <button class="btn-primary" onclick="shareAsImage()">🖼️ Share Beautiful Design via WhatsApp</button>
-            </div>
-        </div>
+<div id="diary-card">
+    <div class="header-section">
+        <label for="logo-upload" class="logo-wrapper">
+            <img id="school-logo">
+            <span class="logo-text" id="logo-placeholder">Tap to add Logo</span>
+        </label>
+        <input type="file" id="logo-upload" accept="image/*" style="display:none">
+        <div id="school-name" class="school-heading" contenteditable="true">Rizwan Public School</div>
+        <div class="author-credits">Prepared by Tanveer Ahmad Khan. +923339951177</div>
     </div>
 
-    <script>
-        const dateDisplay = document.getElementById('current-date');
-        const dayDisplay = document.getElementById('current-day');
-        const today = new Date();
-        dayDisplay.textContent = today.toLocaleDateString('en-US', { weekday: 'long' });
-        dateDisplay.textContent = today.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    <div class="info-bar">
+        <div class="date-text"><span id="current-day"></span>, <span id="current-date"></span></div>
+        <select id="class-select" class="class-dropdown">
+            <option value="" disabled selected>-- Select a Class --</option>
+            <option value="Playgroup">Class: Playgroup</option>
+            <option value="Nursery">Class: Nursery</option>
+            <option value="KG">Class: KG</option>
+            <option value="Class 1">Class 1</option>
+            <option value="Class 2">Class 2</option>
+            <option value="Class 3">Class 3</option>
+            <option value="Class 4">Class 4</option>
+            <option value="Class 5">Class 5</option>
+            <option value="Class 6">Class 6</option>
+            <option value="Class 7">Class 7</option>
+        </select>
+    </div>
 
-        const juniorSubjects = ["English", "Urdu", "Math", "GK", "Islamiyat"];
-        const seniorSubjects = ["English - A", "English - B", "Urdu - A", "Urdu - B", "Math", "GK/SSt/Geo/History", "Computer", "Islamiyat"];
-        const colors = ["#FF6B6B", "#FF8E53", "#4ECDC4", "#45B7D1", "#96CEB4", "#FFEEAD", "#D4A5A5", "#9B59B6"];
+    <div class="body-section" id="main-body">
+        <div id="subjects-container"></div>
+        <h4 style="margin: 15px 0 5px 0; color: #4a90e2;">📝 Important Note:</h4>
+        <textarea id="daily-note" class="note-input" placeholder="Any special instructions?"></textarea>
+        
+        <div class="action-buttons hide-for-capture">
+            <button class="btn-primary" onclick="shareAndSave()">🖼️ Share & Save to History</button>
+            <button class="btn-reset" onclick="resetForNewDay()">🧹 Clear for New Day</button>
+        </div>
+    </div>
+</div>
 
-        const classSelect = document.getElementById('class-select');
-        const mainBody = document.getElementById('main-body');
-        const container = document.getElementById('subjects-container');
+<script>
+    // --- 1. Supabase Config ---
+    const SB_URL = "https://mvdvfzmzafporanneowu.supabase.co";
+    const SB_KEY = "sb_publishable_0a6fBLvOqifI_Th3eFRBiA_g4Cmx0BQ"; // Note: Use Service Role key for backend, but this anon key works for public policies
+    const supabase = supabase.createClient(SB_URL, SB_KEY);
 
-        function autoResize(el) {
-            el.style.height = 'auto';
-            el.style.height = el.scrollHeight + 'px';
-        }
+    // --- 2. Setup ---
+    const dateDisplay = document.getElementById('current-date');
+    const dayDisplay = document.getElementById('current-day');
+    const today = new Date();
+    dayDisplay.textContent = today.toLocaleDateString('en-US', { weekday: 'long' });
+    dateDisplay.textContent = today.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
-        function renderSubjects(selectedClass) {
-            container.innerHTML = '';
-            if (!selectedClass) { mainBody.style.display = 'none'; return; }
-            mainBody.style.display = 'block';
+    const juniorSubs = ["English", "Urdu", "Math", "GK", "Islamiyat"];
+    const seniorSubs = ["English - A", "English - B", "Urdu - A", "Urdu - B", "Math", "GK/SSt/Geo/History", "Computer", "Islamiyat"];
+    const colors = ["#FF6B6B", "#FF8E53", "#4ECDC4", "#45B7D1", "#96CEB4", "#FFEEAD", "#D4A5A5", "#9B59B6"];
 
-            const list = ["Playgroup", "Nursery", "KG"].includes(selectedClass) ? juniorSubjects : seniorSubjects;
+    const classSelect = document.getElementById('class-select');
+    const mainBody = document.getElementById('main-body');
+    const container = document.getElementById('subjects-container');
 
-            list.forEach((name, i) => {
-                const row = document.createElement('div');
-                row.className = 'subject-row';
-                
-                const label = document.createElement('div');
-                label.className = 'subject-label';
-                label.textContent = name;
-                label.style.backgroundColor = colors[i % colors.length];
-                if(name.includes("GK")) label.style.color = "#333";
+    function autoResize(el) { el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px'; }
 
-                const input = document.createElement('textarea');
-                input.className = 'subject-input hw-input';
-                input.dataset.subject = name;
-                input.placeholder = `Add homework...`;
-                input.rows = 1;
+    function renderSubjects(selectedClass) {
+        container.innerHTML = '';
+        if (!selectedClass) { mainBody.style.display = 'none'; return; }
+        mainBody.style.display = 'block';
 
-                // Hidden div that will mirror the textarea for the screenshot
-                const display = document.createElement('div');
-                display.className = 'subject-display';
+        const list = ["Playgroup", "Nursery", "KG"].includes(selectedClass) ? juniorSubs : seniorSubs;
 
-                const storageKey = `hw_${selectedClass}_${name}`;
-                input.value = localStorage.getItem(storageKey) || '';
-                display.textContent = input.value;
-                
-                input.addEventListener('input', function() {
-                    localStorage.setItem(storageKey, this.value);
-                    display.textContent = this.value;
-                    autoResize(this);
-                });
+        list.forEach((name, i) => {
+            const row = document.createElement('div');
+            row.className = 'subject-row';
+            const label = document.createElement('div');
+            label.className = 'subject-label';
+            label.textContent = name;
+            label.style.backgroundColor = colors[i % colors.length];
+            if(name.includes("GK")) label.style.color = "#333";
 
-                row.appendChild(label);
-                row.appendChild(input);
-                row.appendChild(display);
-                container.appendChild(row);
-                setTimeout(() => autoResize(input), 0);
+            const input = document.createElement('textarea');
+            input.className = 'subject-input hw-input';
+            input.dataset.subject = name;
+            input.placeholder = `...`;
+            
+            const display = document.createElement('div');
+            display.className = 'subject-display';
+
+            const storageKey = `hw_${selectedClass}_${name}`;
+            input.value = localStorage.getItem(storageKey) || '';
+            display.textContent = input.value;
+            
+            input.addEventListener('input', function() {
+                localStorage.setItem(storageKey, this.value);
+                display.textContent = this.value;
+                autoResize(this);
             });
+
+            row.appendChild(label);
+            row.appendChild(input);
+            row.appendChild(display);
+            container.appendChild(row);
+            setTimeout(() => autoResize(input), 0);
+        });
+    }
+
+    classSelect.addEventListener('change', (e) => {
+        localStorage.setItem('selected_class', e.target.value);
+        renderSubjects(e.target.value);
+    });
+
+    // --- 3. Persistence ---
+    const savedClass = localStorage.getItem('selected_class');
+    if (savedClass) { classSelect.value = savedClass; renderSubjects(savedClass); }
+
+    const schoolHeading = document.getElementById('school-name');
+    const savedName = localStorage.getItem('school_name');
+    if (savedName) schoolHeading.textContent = savedName;
+    schoolHeading.addEventListener('input', e => localStorage.setItem('school_name', e.target.textContent));
+
+    const logoUpload = document.getElementById('logo-upload');
+    const schoolLogo = document.getElementById('school-logo');
+    const logoPlaceholder = document.getElementById('logo-placeholder');
+    const savedLogo = localStorage.getItem('school_logo');
+    if (savedLogo) { schoolLogo.src = savedLogo; schoolLogo.style.display = 'block'; logoPlaceholder.style.display = 'none'; }
+
+    logoUpload.addEventListener('change', e => {
+        const reader = new FileReader();
+        reader.onload = img => {
+            schoolLogo.src = img.target.result;
+            schoolLogo.style.display = 'block';
+            logoPlaceholder.style.display = 'none';
+            localStorage.setItem('school_logo', img.target.result);
+        };
+        reader.readAsDataURL(e.target.files[0]);
+    });
+
+    // --- 4. The Reset Logic (Ready Position) ---
+    function resetForNewDay() {
+        if(confirm("This will clear all current homework text. Are you sure?")) {
+            const inputs = document.querySelectorAll('.hw-input');
+            inputs.forEach(input => {
+                input.value = '';
+                localStorage.removeItem(`hw_${classSelect.value}_${input.dataset.subject}`);
+            });
+            document.getElementById('daily-note').value = '';
+            localStorage.removeItem('hw_note');
+            alert("Ready for a new day!");
+            renderSubjects(classSelect.value);
         }
+    }
 
-        classSelect.addEventListener('change', (e) => {
-            localStorage.setItem('selected_class', e.target.value);
-            renderSubjects(e.target.value);
-        });
+    // --- 5. Share & Save Logic ---
+    async function shareAndSave() {
+        const loading = document.getElementById('loading');
+        loading.style.display = 'flex';
 
-        const savedClass = localStorage.getItem('selected_class');
-        if (savedClass) { classSelect.value = savedClass; renderSubjects(savedClass); }
+        // Collect data for Supabase
+        const hwData = {};
+        document.querySelectorAll('.hw-input').forEach(i => { if(i.value) hwData[i.dataset.subject] = i.value; });
 
-        // School Logo Logic
-        const logoUpload = document.getElementById('logo-upload');
-        const schoolLogo = document.getElementById('school-logo');
-        const logoPlaceholder = document.getElementById('logo-placeholder-text');
-        const savedLogo = localStorage.getItem('school_logo');
-        if (savedLogo) { schoolLogo.src = savedLogo; schoolLogo.style.display = 'block'; logoPlaceholder.style.display = 'none'; }
+        try {
+            // A. Save to Supabase
+            await supabase.from('diaries').insert([{
+                school_name: schoolHeading.textContent,
+                class_name: classSelect.value,
+                diary_date: new Date().toISOString().split('T')[0],
+                homework_data: hwData,
+                note: document.getElementById('daily-note').value
+            }]);
 
-        logoUpload.addEventListener('change', e => {
-            const reader = new FileReader();
-            reader.onload = img => {
-                schoolLogo.src = img.target.result;
-                schoolLogo.style.display = 'block';
-                logoPlaceholder.style.display = 'none';
-                localStorage.setItem('school_logo', img.target.result);
-            };
-            reader.readAsDataURL(e.target.files[0]);
-        });
-
-        // FIXED Screenshot Logic
-        async function shareAsImage() {
+            // B. Capture Image
             const diaryCard = document.getElementById('diary-card');
-            const loading = document.getElementById('loading');
-            loading.style.display = 'flex';
-
-            // Sync all display divs with their textareas
             document.querySelectorAll('.subject-row').forEach(row => {
-                const input = row.querySelector('.subject-input');
-                const display = row.querySelector('.subject-display');
-                display.textContent = input.value;
-                // Hide row if empty
-                if(!input.value.trim()) row.style.display = 'none';
+                if(!row.querySelector('.hw-input').value.trim()) row.style.display = 'none';
             });
-
             diaryCard.classList.add('capturing');
 
-            try {
-                const canvas = await html2canvas(diaryCard, {
-                    scale: 2, useCORS: true, backgroundColor: '#ffffff',
-                    windowWidth: diaryCard.scrollWidth,
-                    windowHeight: diaryCard.scrollHeight
-                });
-
-                canvas.toBlob(async blob => {
-                    const file = new File([blob], "Diary.png", { type: "image/png" });
-                    if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                        await navigator.share({ files: [file], title: 'Homework' });
-                    } else {
-                        const link = document.createElement('a');
-                        link.download = 'Diary.png'; link.href = URL.createObjectURL(blob); link.click();
-                    }
-                });
-            } finally {
-                diaryCard.classList.remove('capturing');
-                document.querySelectorAll('.subject-row').forEach(row => row.style.display = 'flex');
-                loading.style.display = 'none';
-            }
+            const canvas = await html2canvas(diaryCard, { scale: 2, useCORS: true, backgroundColor: '#ffffff' });
+            canvas.toBlob(async blob => {
+                const file = new File([blob], "Diary.png", { type: "image/png" });
+                if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                    await navigator.share({ files: [file], title: 'Daily Homework' });
+                } else {
+                    const link = document.createElement('a');
+                    link.download = 'Diary.png'; link.href = URL.createObjectURL(blob); link.click();
+                }
+            });
+        } catch (err) {
+            console.error(err);
+            alert("Shared, but cloud sync failed. Check internet.");
+        } finally {
+            document.getElementById('diary-card').classList.remove('capturing');
+            document.querySelectorAll('.subject-row').forEach(row => row.style.display = 'flex');
+            loading.style.display = 'none';
         }
-    </script>
+    }
+</script>
 </body>
 </html>
