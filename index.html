@@ -7,7 +7,57 @@
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#4a90e2">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
+	// --- Auth Logic ---
+	async function handleLogin() {
+    	const email = document.getElementById('login-email').value;
+    	const password = document.getElementById('login-password').value;
+    
+    	const { data, error } = await db.auth.signInWithPassword({ email, password });
+    
+    		if (error) {
+        	alert("Login failed: " + error.message);
+    			} else {
+        	document.getElementById('login-screen').style.display = 'none';
+        	document.getElementById('diary-card').style.display = 'block';
+  	  		}
+			}
+
+	// --- History Logic ---
+	async function showHistory() {
+	document.getElementById('history-modal').style.display = 'block';
+    	const list = document.getElementById('history-list');
+    	list.innerHTML = "Fetching records...";
+
+    	const { data, error } = await db
+        .from('diaries')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(10);
+
+    	if (error) {
+        list.innerHTML = "Error loading history.";
+    	} else {
+        list.innerHTML = data.map(entry => `
+            <div style="border-bottom: 1px solid #ddd; padding: 10px 0;">
+                <strong>${entry.diary_date}</strong> - ${entry.class_name}<br>
+                <button onclick='loadEntry(${JSON.stringify(entry)})' style="font-size: 10px;">Load this Homework</button>
+            </div>
+        `).join('');
+    	}
+	}
+
+	function loadEntry(entry) {
+    	// Logic to refill the boxes with old homework
+    	alert("Loading data for " + entry.class_name);
+    	// You can set the values back to the inputs here!
+    	closeHistory();
+	}
+
+	function closeHistory() {
+    	document.getElementById('history-modal').style.display = 'none';
+	}
+	</script>
     <style>
         :root { --bg-color: #f0f4f8; --card-bg: #ffffff; --text-color: #333; }
         body { font-family: 'Segoe UI', system-ui, sans-serif; background-color: var(--bg-color); color: var(--text-color); display: flex; justify-content: center; padding: 15px; margin: 0; }
